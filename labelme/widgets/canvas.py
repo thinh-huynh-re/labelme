@@ -61,6 +61,8 @@ class Canvas(QtWidgets.QWidget):
         self.line = Shape()
         self.prevPoint = QtCore.QPoint()
         self.prevMovePoint = QtCore.QPoint()
+        self.prevPointDragImage = QtCore.QPoint()
+        self.isHoldSpace = False
         self.offsets = QtCore.QPoint(), QtCore.QPoint()
         self.scale = 1.0
         self.pixmap = QtGui.QPixmap()
@@ -178,6 +180,19 @@ class Canvas(QtWidgets.QWidget):
                 pos = self.transformPos(ev.posF())
         except AttributeError:
             return
+
+        if ev.buttons() & QtCore.Qt.LeftButton and self.isHoldSpace:
+            reduceRate = 0.42
+            targetPos = pos
+            posDelta = targetPos - self.prevPointDragImage
+            xDeltaOnScale = round(reduceRate*self.scale*posDelta.x())
+            yDeltaOnScale = round(reduceRate*self.scale*posDelta.y())
+            self.prevPointDragImage = targetPos
+
+            if xDeltaOnScale != 0:
+                xDeltaOnScale and self.scrollRequest.emit(xDeltaOnScale, QtCore.Qt.Horizontal)
+            if yDeltaOnScale != 0:
+                yDeltaOnScale and self.scrollRequest.emit(yDeltaOnScale, QtCore.Qt.Vertical)
 
         self.prevMovePoint = pos
         self.restoreCursor()
@@ -321,47 +336,55 @@ class Canvas(QtWidgets.QWidget):
             pos = self.transformPos(ev.localPos())
         else:
             pos = self.transformPos(ev.posF())
-        if ev.button() == QtCore.Qt.LeftButton:
-            if self.drawing():
-                if self.current:
-                    # Add point to existing shape.
-                    if self.createMode == "polygon":
-                        self.current.addPoint(self.line[1])
-                        self.line[0] = self.current[-1]
-                        if self.current.isClosed():
+
+        if self.isHoldSpace:
+            if ev.button() == QtCore.Qt.LeftButton:
+                self.prevPointDragImage = pos
+                self.repaint()
+        else:
+            if ev.button() == QtCore.Qt.LeftButton:
+                if self.drawing():
+                    if self.current:
+                        # Add point to existing shape.
+                        if self.createMode == "polygon":
+                            self.current.addPoint(self.line[1])
+                            self.line[0] = self.current[-1]
+                            if self.current.isClosed():
+                                self.finalise()
+                        elif self.createMode in ["rectangle", "circle", "line"]:
+                            assert len(self.current.points) == 1
+                            self.current.points = self.line.points
                             self.finalise()
-                    elif self.createMode in ["rectangle", "circle", "line"]:
-                        assert len(self.current.points) == 1
-                        self.current.points = self.line.points
-                        self.finalise()
-                    elif self.createMode == "linestrip":
-                        self.current.addPoint(self.line[1])
-                        self.line[0] = self.current[-1]
-                        if int(ev.modifiers()) == QtCore.Qt.ControlModifier:
+                        elif self.createMode == "linestrip":
+                            self.current.addPoint(self.line[1])
+                            self.line[0] = self.current[-1]
+                            if int(ev.modifiers()) == QtCore.Qt.ControlModifier:
+                                self.finalise()
+                    elif not self.outOfPixmap(pos):
+                        # Create new shape.
+                        self.current = Shape(shape_type=self.createMode)
+                        self.current.addPoint(pos)
+                        if self.createMode == "point":
                             self.finalise()
-                elif not self.outOfPixmap(pos):
-                    # Create new shape.
-                    self.current = Shape(shape_type=self.createMode)
-                    self.current.addPoint(pos)
-                    if self.createMode == "point":
-                        self.finalise()
-                    else:
-                        if self.createMode == "circle":
-                            self.current.shape_type = "circle"
-                        self.line.points = [pos, pos]
-                        self.setHiding()
-                        self.drawingPolygon.emit(True)
-                        self.update()
-            else:
+                        else:
+                            if self.createMode == "circle":
+                                self.current.shape_type = "circle"
+                            self.line.points = [pos, pos]
+                            self.setHiding()
+                            self.drawingPolygon.emit(True)
+                            self.update()
+                else:
+                    group_mode = int(ev.modifiers()) == QtCore.Qt.ControlModifier
+                    self.selectShapePoint(pos, multiple_selection_mode=group_mode)
+                    self.prevPoint = pos
+                    self.repaint()
+            elif ev.button() == QtCore.Qt.RightButton and self.editing():
                 group_mode = int(ev.modifiers()) == QtCore.Qt.ControlModifier
                 self.selectShapePoint(pos, multiple_selection_mode=group_mode)
                 self.prevPoint = pos
                 self.repaint()
-        elif ev.button() == QtCore.Qt.RightButton and self.editing():
-            group_mode = int(ev.modifiers()) == QtCore.Qt.ControlModifier
-            self.selectShapePoint(pos, multiple_selection_mode=group_mode)
-            self.prevPoint = pos
-            self.repaint()
+
+
 
     def mouseReleaseEvent(self, ev):
         if ev.button() == QtCore.Qt.RightButton:
@@ -726,6 +749,14 @@ class Canvas(QtWidgets.QWidget):
             self.update()
         elif key == QtCore.Qt.Key_Return and self.canCloseShape():
             self.finalise()
+
+        if key == QtCore.Qt.Key_Space:
+            self.isHoldSpace = True
+
+    def keyReleaseEvent(self, ev):
+        key = ev.key()
+        if key == QtCore.Qt.Key_Space:
+            self.isHoldSpace = False
 
     def setLastLabel(self, text, flags):
         assert text
