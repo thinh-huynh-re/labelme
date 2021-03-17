@@ -25,6 +25,7 @@ from labelme.logger import logger
 from labelme.shape import Shape
 from labelme.widgets import BrightnessContrastDialog
 from labelme.widgets import Canvas
+from labelme.widgets import ValueDialog
 from labelme.widgets import LabelDialog
 from labelme.widgets import LabelListWidget
 from labelme.widgets import LabelListWidgetItem
@@ -93,6 +94,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dirty = False
 
         self._noSelectionSlot = False
+
+        self.valueDialog = ValueDialog(parent=self)
 
         # Main widgets and related state.
         self.labelDialog = LabelDialog(
@@ -371,6 +374,7 @@ class MainWindow(QtWidgets.QMainWindow):
             enabled=False,
         )
 
+
         delete = action(
             self.tr("Delete Polygons"),
             self.deleteSelectedShape,
@@ -534,6 +538,15 @@ class MainWindow(QtWidgets.QMainWindow):
             enabled=False,
         )
 
+        editValue = action(
+            self.tr("&Edit Value"),
+            self.setEditValue,
+            shortcuts["edit_value"],
+            "editValue",
+            self.tr("Modify the value of the selected polygon"),
+            enabled=False,
+        )
+
         fill_drawing = action(
             self.tr("Fill Drawing Polygon"),
             self.canvas.setFillDrawing,
@@ -566,6 +579,7 @@ class MainWindow(QtWidgets.QMainWindow):
             toggleKeepPrevMode=toggle_keep_prev_mode,
             delete=delete,
             edit=edit,
+            editValue=editValue,
             copy=copy,
             undoLastPoint=undoLastPoint,
             undo=undo,
@@ -593,6 +607,7 @@ class MainWindow(QtWidgets.QMainWindow):
             # XXX: need to add some actions here to activate the shortcut
             editMenu=(
                 edit,
+                editValue,
                 copy,
                 delete,
                 None,
@@ -613,6 +628,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 createLineStripMode,
                 editMode,
                 edit,
+                editValue,
                 copy,
                 delete,
                 undo,
@@ -1059,6 +1075,28 @@ class MainWindow(QtWidgets.QMainWindow):
             item.setData(Qt.UserRole, shape.label)
             self.uniqLabelList.addItem(item)
 
+    def setEditValue(self, item=None):
+        if not self.canvas.editing():
+            return
+        if not item:
+            item = self.currentItem()
+        if item is None:
+            return
+        shape = item.shape()
+        if shape is None:
+            return
+
+        valueForKey = ''
+        if shape.other_data is not None and shape.other_data.get('value') is not None:
+            valueForKey = shape.other_data.get('value')
+        text = self.valueDialog.popUp(
+            text=valueForKey,
+        )
+        if text is None:
+            return
+        shape.other_data['value'] = text
+        self.setDirty()
+
     def fileSearchChanged(self):
         self.importDirImages(
             self.lastOpenDir,
@@ -1098,6 +1136,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actions.delete.setEnabled(n_selected)
         self.actions.copy.setEnabled(n_selected)
         self.actions.edit.setEnabled(n_selected == 1)
+        self.actions.editValue.setEnabled(n_selected == 1)
 
     def addLabel(self, shape):
         if shape.group_id is None:

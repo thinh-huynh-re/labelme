@@ -293,9 +293,14 @@ class Canvas(QtWidgets.QWidget):
                 self.hVertex = None
                 self.prevhShape = self.hShape = shape
                 self.prevhEdge = self.hEdge = index_edge
-                self.setToolTip(
-                    self.tr("Click & drag to move shape '%s'") % shape.label
-                )
+                if shape.other_data is not None and shape.other_data.get('value') is not None:
+                    self.setToolTip(
+                        self.tr("%s") % shape.other_data.get('value')
+                    )
+                else:
+                    self.setToolTip(
+                        self.tr("Click & drag to move shape '%s'") % shape.label
+                    )
                 self.setStatusTip(self.toolTip())
                 self.overrideCursor(CURSOR_GRAB)
                 self.update()

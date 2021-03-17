@@ -9,6 +9,8 @@ from .color_dialog import ColorDialog
 from .label_dialog import LabelDialog
 from .label_dialog import LabelQLineEdit
 
+from .value_dialog import ValueDialog
+
 from .label_list_widget import LabelListWidget
 from .label_list_widget import LabelListWidgetItem
 
