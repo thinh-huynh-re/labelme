@@ -86,6 +86,8 @@ class Canvas(QtWidgets.QWidget):
         self.setMouseTracking(True)
         self.setFocusPolicy(QtCore.Qt.WheelFocus)
 
+
+
     def fillDrawing(self):
         return self._fill_drawing
 
@@ -282,6 +284,9 @@ class Canvas(QtWidgets.QWidget):
                 self.prevhEdge = self.hEdge = index_edge
                 shape.highlightVertex(index, shape.MOVE_VERTEX)
                 self.overrideCursor(CURSOR_POINT)
+                self.setStyleSheet("""QToolTip {
+                                        font-size: 14px; 
+                                    }""")
                 self.setToolTip(self.tr("Click & drag to move point"))
                 self.setStatusTip(self.toolTip())
                 self.update()
@@ -294,10 +299,16 @@ class Canvas(QtWidgets.QWidget):
                 self.prevhShape = self.hShape = shape
                 self.prevhEdge = self.hEdge = index_edge
                 if shape.other_data is not None and shape.other_data.get('value') is not None:
+                    self.setStyleSheet("""QToolTip {
+                                            font-size: 24px; 
+                                        }""")
                     self.setToolTip(
                         self.tr("%s") % shape.other_data.get('value')
                     )
                 else:
+                    self.setStyleSheet("""QToolTip {
+                                            font-size: 14px; 
+                                        }""")
                     self.setToolTip(
                         self.tr("Click & drag to move shape '%s'") % shape.label
                     )
