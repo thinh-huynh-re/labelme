@@ -30,4 +30,4 @@ pip uninstall labelme
 # Install the new version
 pip install -e .
 ```
-4. Type `lableme` on Terminal to open GUI.
+4. Type `labelme` on Terminal to open GUI.
