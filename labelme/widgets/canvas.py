@@ -298,7 +298,7 @@ class Canvas(QtWidgets.QWidget):
                 self.hVertex = None
                 self.prevhShape = self.hShape = shape
                 self.prevhEdge = self.hEdge = index_edge
-                if shape.other_data is not None and shape.other_data.get('value') is not None:
+                if shape.other_data is not None and shape.other_data.get('value'):
                     self.setStyleSheet("""QToolTip {
                                             font-size: 24px; 
                                         }""")
