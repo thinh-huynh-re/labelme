@@ -23,7 +23,10 @@ conda activate labelme
 3. Change directory to **labelme** folder, then run:
 
 ```bash
+# Uninstall the old version
+pip uninstall labelme
+
+# Install the new version
 pip install -e .
 ```
 4. Type `lableme` on Terminal to open GUI.
-enhanced 
