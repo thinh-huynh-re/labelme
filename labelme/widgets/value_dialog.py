@@ -18,12 +18,16 @@ class ValueDialog(QtWidgets.QDialog):
         layout = QtWidgets.QVBoxLayout()
 
         self.edit = QtWidgets.QLineEdit()
+        self.edit.setMinimumWidth(500)
+        font = self.edit.font()
+        font.setPointSize(16)
+        self.edit.setFont(font)
         self.edit.setPlaceholderText(text)
-        self.edit.setValidator(labelme.utils.labelValidator())
+        self.edit.setStyleSheet("QLineEdit { padding: 6 }")
         self.edit.editingFinished.connect(self.postProcess)
 
         layout_edit = QtWidgets.QHBoxLayout()
-        layout_edit.addWidget(self.edit, 12)
+        layout_edit.addWidget(self.edit)
         layout.addLayout(layout_edit)
 
         # buttons
@@ -41,13 +45,7 @@ class ValueDialog(QtWidgets.QDialog):
         self.setLayout(layout)
 
     def validate(self):
-        text = self.edit.text()
-        if hasattr(text, "strip"):
-            text = text.strip()
-        else:
-            text = text.trimmed()
-        if text:
-            self.accept()
+        self.accept()
 
     def postProcess(self):
         text = self.edit.text()
