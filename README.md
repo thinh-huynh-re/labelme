@@ -7,6 +7,7 @@
  - [x] hold **Space** and **LeftClick**  to drag the image
  - [x] display **Value** of segmentation when hovered
  - [x] edit **Value** by  **RightClick-->Edit Value** (**Ctrl+G**)
+ - [x] NOT save with image data by default
 
 *enhanced by locpnh*
 
