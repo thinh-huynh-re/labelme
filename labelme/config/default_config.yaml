@@ -30,6 +30,11 @@ shape:
   hvertex_fill_color: [255, 255, 255, 255]
 
 # main
+value_dock:
+  show: true
+  closable: true
+  movable: true
+  floatable: true
 flag_dock:
   show: true
   closable: true

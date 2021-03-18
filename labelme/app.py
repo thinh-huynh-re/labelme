@@ -110,6 +110,21 @@ class MainWindow(QtWidgets.QMainWindow):
             flags=self._config["label_flags"],
         )
 
+        self.valueTextInput = QtWidgets.QLineEdit()
+        widgetTextInputFont = self.valueTextInput.font()
+        widgetTextInputFont.setPointSize(16)
+        self.valueTextInput.setFont(widgetTextInputFont)
+        self.valueTextInput.setEnabled(False)
+
+        valueTextInputLayout = QtWidgets.QVBoxLayout()
+        self.value_widget = QtWidgets.QListWidget()
+        valueTextInputLayout.addWidget(self.valueTextInput)
+        self.value_widget.setLayout(valueTextInputLayout)
+
+        self.value_dock = QtWidgets.QDockWidget(self.tr("Value"), self)
+        self.value_dock.setObjectName("Value")
+        self.value_dock.setWidget(self.value_widget)
+
         self.labelList = LabelListWidget()
         self.lastOpenDir = None
 
@@ -193,7 +208,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(scrollArea)
 
         features = QtWidgets.QDockWidget.DockWidgetFeatures()
-        for dock in ["flag_dock", "label_dock", "shape_dock", "file_dock"]:
+        for dock in ["value_dock", "flag_dock", "label_dock", "shape_dock", "file_dock"]:
             if self._config[dock]["closable"]:
                 features = features | QtWidgets.QDockWidget.DockWidgetClosable
             if self._config[dock]["floatable"]:
@@ -204,10 +219,12 @@ class MainWindow(QtWidgets.QMainWindow):
             if self._config[dock]["show"] is False:
                 getattr(self, dock).setVisible(False)
 
+        self.addDockWidget(Qt.RightDockWidgetArea, self.value_dock)
         self.addDockWidget(Qt.RightDockWidgetArea, self.flag_dock)
         self.addDockWidget(Qt.RightDockWidgetArea, self.label_dock)
         self.addDockWidget(Qt.RightDockWidgetArea, self.shape_dock)
         self.addDockWidget(Qt.RightDockWidgetArea, self.file_dock)
+
 
         # Actions
         action = functools.partial(utils.newAction, self)
@@ -1097,6 +1114,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if text is None:
             return
         shape.other_data['value'] = text
+        self.valueTextInput.setText(text)
         self.setDirty()
 
     def fileSearchChanged(self):
@@ -1139,6 +1157,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actions.copy.setEnabled(n_selected)
         self.actions.edit.setEnabled(n_selected == 1)
         self.actions.editValue.setEnabled(n_selected == 1)
+
+        if n_selected == 1 and selected_shapes[0]:
+            if selected_shapes[0].other_data is not None:
+                self.valueTextInput.setText(selected_shapes[0].other_data.get('value'))
+
 
     def addLabel(self, shape):
         if shape.group_id is None:
