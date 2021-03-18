@@ -1,12 +1,14 @@
 
+
 ### Original document: https://github.com/wkentaro/labelme
 
 ---
 ## New Features
-
  - [x] hold **Space** and **LeftClick**  to drag the image
  - [x] display **Value** of segmentation when hovered
  - [x] edit **Value** by  **RightClick-->Edit Value** (**Ctrl+G**)
+
+*enhanced by locpnh*
 
 ## Installation
 1. You need install [Anaconda](https://docs.anaconda.com/anaconda/install/), then run below:
@@ -23,3 +25,4 @@ conda activate labelme
 pip install -e .
 ```
 4. Type `lableme` on Terminal to open GUI.
+enhanced 
