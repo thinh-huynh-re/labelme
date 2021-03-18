@@ -2,6 +2,12 @@
 ### Original document: https://github.com/wkentaro/labelme
 
 ---
+## New Features
+
+ - [x] hold **Space** and **LeftClick**  to drag the image
+ - [x] display **Value** of segmentation when hovered
+ - [x] edit **Value** by  **RightClick-->Edit Value** (**Ctrl+G**)
+
 ## Installation
 1. You need install [Anaconda](https://docs.anaconda.com/anaconda/install/), then run below:
 ```bash
