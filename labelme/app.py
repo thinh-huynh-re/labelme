@@ -93,6 +93,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # Whether we need to save or not.
         self.dirty = False
 
+        self.isSaveWithImageData = False
+
         self._noSelectionSlot = False
 
         self.valueDialog = ValueDialog(parent=self)
@@ -296,7 +298,7 @@ class MainWindow(QtWidgets.QMainWindow):
             slot=self.enableSaveImageWithData,
             tip="Save image data in label file",
             checkable=True,
-            checked=self._config["store_data"],
+            checked=self.isSaveWithImageData,
         )
 
         close = action(
@@ -1266,7 +1268,7 @@ class MainWindow(QtWidgets.QMainWindow):
             flags[key] = flag
         try:
             imagePath = osp.relpath(self.imagePath, osp.dirname(filename))
-            imageData = self.imageData if self._config["store_data"] else None
+            imageData = self.imageData if self.isSaveWithImageData else None
             if osp.dirname(filename) and not osp.exists(osp.dirname(filename)):
                 os.makedirs(osp.dirname(filename))
             lf.save(
@@ -1621,7 +1623,7 @@ class MainWindow(QtWidgets.QMainWindow):
         return w / self.canvas.pixmap.width()
 
     def enableSaveImageWithData(self, enabled):
-        self._config["store_data"] = enabled
+        self.isSaveWithImageData = enabled
         self.actions.saveWithImageData.setChecked(enabled)
 
     def closeEvent(self, event):

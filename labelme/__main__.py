@@ -49,13 +49,13 @@ def main():
         default=default_config_file,
     )
     # config for the gui
-    parser.add_argument(
-        "--nodata",
-        dest="store_data",
-        action="store_false",
-        help="stop storing image data to JSON file",
-        default=argparse.SUPPRESS,
-    )
+    # parser.add_argument(
+    #     "--nodata",
+    #     dest="store_data",
+    #     action="store_false",
+    #     help="stop storing image data to JSON file",
+    #     default=argparse.SUPPRESS,
+    # )
     parser.add_argument(
         "--autosave",
         dest="auto_save",
