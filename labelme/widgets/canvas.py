@@ -28,6 +28,7 @@ class Canvas(QtWidgets.QWidget):
     drawingPolygon = QtCore.Signal(bool)
     edgeSelected = QtCore.Signal(bool, object)
     vertexSelected = QtCore.Signal(bool)
+    hideFirstSelectedShape = QtCore.Signal(object)
 
     CREATE, EDIT = 0, 1
 
@@ -773,6 +774,9 @@ class Canvas(QtWidgets.QWidget):
         key = ev.key()
         if key == QtCore.Qt.Key_Space:
             self.isHoldSpace = False
+            
+            if self.selectedShapes is not None and len(self.selectedShapes) > 0:
+                self.hideFirstSelectedShape.emit(self.selectedShapes[0])
 
     def setLastLabel(self, text, flags):
         assert text

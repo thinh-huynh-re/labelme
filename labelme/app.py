@@ -190,6 +190,7 @@ class MainWindow(QtWidgets.QMainWindow):
             double_click=self._config["canvas"]["double_click"],
         )
         self.canvas.zoomRequest.connect(self.zoomRequest)
+        self.canvas.hideFirstSelectedShape.connect(self.hideFirstSelectedShape)
 
         scrollArea = QtWidgets.QScrollArea()
         scrollArea.setWidget(self.canvas)
@@ -1475,6 +1476,21 @@ class MainWindow(QtWidgets.QMainWindow):
     def togglePolygons(self, value):
         for item in self.labelList:
             item.setCheckState(Qt.Checked if value else Qt.Unchecked)
+
+    def hideFirstSelectedShape(self, shape):
+        if shape:
+            def getLabelName(item_text):
+                label_split = re.split(" ", item_text)
+                label_name = ''
+                if label_split and len(label_split) > 0:
+                    label_name = label_split[0]
+                return label_name
+
+            for item in self.labelList:
+                # NOTE: with same label name and same object memory allocation, then HIDE
+                if getLabelName(item.text()) == shape.label and hex(id(shape)) == hex(id(item.shape())):
+                    item.setCheckState(False)
+                    break
 
     def loadFile(self, filename=None):
         """Load the specified file, or the last opened file if None."""
