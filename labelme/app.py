@@ -226,7 +226,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.addDockWidget(Qt.RightDockWidgetArea, self.shape_dock)
         self.addDockWidget(Qt.RightDockWidgetArea, self.file_dock)
 
-
         # Actions
         action = functools.partial(utils.newAction, self)
         shortcuts = self._config["shortcuts"]
@@ -385,6 +384,16 @@ class MainWindow(QtWidgets.QMainWindow):
             self.tr("Start drawing linestrip. Ctrl+LeftClick ends creation."),
             enabled=False,
         )
+
+        convertToRectangleOrPolygon = action(
+            self.tr("Convert to Rectangle/Polygons"),
+            self.convertToRectangleOrPolygon,
+            shortcuts["convert_to_rectangle_polygon"],
+            "edit",
+            self.tr("Convert Rectangle/Polygons"),
+            enabled=False,
+        )
+
         editMode = action(
             self.tr("Edit Polygons"),
             self.setEditMode,
@@ -393,7 +402,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.tr("Move and edit the selected polygons"),
             enabled=False,
         )
-
 
         delete = action(
             self.tr("Delete Polygons"),
@@ -562,7 +570,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.tr("&Edit Value"),
             self.setEditValue,
             shortcuts["edit_value"],
-            "editValue",
+            "edit",
             self.tr("Modify the value of the selected polygon"),
             enabled=False,
         )
@@ -612,6 +620,7 @@ class MainWindow(QtWidgets.QMainWindow):
             createLineMode=createLineMode,
             createPointMode=createPointMode,
             createLineStripMode=createLineStripMode,
+            convertToRectangleOrPolygon=convertToRectangleOrPolygon,
             zoom=zoom,
             zoomIn=zoomIn,
             zoomOut=zoomOut,
@@ -629,6 +638,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 edit,
                 editValue,
                 copy,
+                convertToRectangleOrPolygon,
                 delete,
                 None,
                 undo,
@@ -646,6 +656,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 createLineMode,
                 createPointMode,
                 createLineStripMode,
+                convertToRectangleOrPolygon,
                 editMode,
                 edit,
                 editValue,
@@ -664,6 +675,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 createLineMode,
                 createPointMode,
                 createLineStripMode,
+                convertToRectangleOrPolygon,
                 editMode,
                 brightnessContrast,
             ),
@@ -1156,13 +1168,14 @@ class MainWindow(QtWidgets.QMainWindow):
         n_selected = len(selected_shapes)
         self.actions.delete.setEnabled(n_selected)
         self.actions.copy.setEnabled(n_selected)
+        self.actions.convertToRectangleOrPolygon.setEnabled(n_selected)
         self.actions.edit.setEnabled(n_selected == 1)
         self.actions.editValue.setEnabled(n_selected == 1)
 
         if n_selected == 1 and selected_shapes[0]:
             if selected_shapes[0].other_data is not None:
-                self.valueTextInput.setText(selected_shapes[0].other_data.get('value'))
-
+                self.valueTextInput.setText(
+                    selected_shapes[0].other_data.get('value'))
 
     def addLabel(self, shape):
         if shape.group_id is None:
@@ -1321,6 +1334,44 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.tr("Error saving label data"), self.tr("<b>%s</b>") % e
             )
             return False
+
+    def convertToRectangleOrPolygon(self):
+        targetConvertShapes = self.canvas.selectedShapes
+        if len(targetConvertShapes) == 1:
+            targetShape = targetConvertShapes[0]
+            if targetShape.shape_type == "polygon" and len(targetShape.points) == 4:
+                targetShape.removePoint(1)
+                targetShape.removePoint(2)
+                targetShape.shape_type = "rectangle"
+                targetShape.selected = False
+
+                # self.canvas.deSelectShape()
+                self.addLabel(targetShape)
+                self.deleteSelectedShape(True)
+                self.labelList.clearSelection()
+
+                self.setDirty()
+            elif targetShape.shape_type == "rectangle" and len(targetShape.points) == 2:
+                firstPoint = targetShape.points[0]
+                thirdPoint = targetShape.points[1]
+                secondPoint = QtCore.QPointF(thirdPoint.x(), firstPoint.y())
+                lastPoint = QtCore.QPointF(
+                    firstPoint.x(), thirdPoint.y())
+
+                targetShape.shape_type = "polygon"
+                targetShape.addPoint(secondPoint)
+                targetShape.addPoint(lastPoint)
+                targetShape[1] = secondPoint
+                targetShape[2] = thirdPoint
+                targetShape[3] = lastPoint
+                targetShape.selected = False
+
+                # self.canvas.deSelectShape()
+                self.addLabel(targetShape)
+                self.deleteSelectedShape(True)
+                self.labelList.clearSelection()
+
+                self.setDirty()
 
     def copySelectedShape(self):
         added_shapes = self.canvas.copySelectedShapes()
@@ -1963,20 +2014,27 @@ class MainWindow(QtWidgets.QMainWindow):
                 for action in self.actions.onShapesPresent:
                     action.setEnabled(False)
 
-    def deleteSelectedShape(self):
-        yes, no = QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No
-        msg = self.tr(
-            "You are about to permanently delete {} polygons, "
-            "proceed anyway?"
-        ).format(len(self.canvas.selectedShapes))
-        if yes == QtWidgets.QMessageBox.warning(
-            self, self.tr("Attention"), msg, yes | no, yes
-        ):
+    def deleteSelectedShape(self, isForce=False):
+
+        def removeChildFunc(self):
             self.remLabels(self.canvas.deleteSelected())
             self.setDirty()
             if self.noShapes():
                 for action in self.actions.onShapesPresent:
                     action.setEnabled(False)
+
+        if not isForce:
+            yes, no = QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No
+            msg = self.tr(
+                "You are about to permanently delete {} polygons, "
+                "proceed anyway?"
+            ).format(len(self.canvas.selectedShapes))
+            if yes == QtWidgets.QMessageBox.warning(
+                self, self.tr("Attention"), msg, yes | no, yes
+            ):
+                removeChildFunc(self)
+        else:
+            removeChildFunc(self)
 
     def copyShape(self):
         self.canvas.endMove(copy=True)

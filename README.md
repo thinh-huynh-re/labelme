@@ -17,8 +17,16 @@
       <br/>
       <br/>
 - [x] press **Space** to hidden the selected polygon.
+      <br/>
+      <br/>
+- [x] **Convert** Rectangle <--> Polygon in Right Click menu (**Ctrl+T**).
 
 _enhanced by locpnh_
+
+### Notice
+
+Remove **.labelmerc** file to apply the new keyboard shortcuts
+`rm ~/.labelmerc`
 
 ## Installation
 

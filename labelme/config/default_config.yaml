@@ -15,14 +15,14 @@ sort_labels: true
 validate_label: null
 
 default_shape_color: [0, 255, 0]
-shape_color: auto  # null, 'auto', 'manual'
+shape_color: auto # null, 'auto', 'manual'
 shift_auto_shape_color: 0
 label_colors: null
 
 shape:
   # drawing
   line_color: [0, 255, 0, 128]
-  fill_color: [0, 255, 0, 0]  # transparent
+  fill_color: [0, 255, 0, 0] # transparent
   vertex_fill_color: [0, 255, 0, 255]
   # selecting / hovering
   select_line_color: [255, 255, 255, 255]
@@ -98,6 +98,7 @@ shortcuts:
   edit_polygon: Ctrl+J
   delete_polygon: Delete
   duplicate_polygon: Ctrl+D
+  convert_to_rectangle_polygon: Ctrl+T
   undo: Ctrl+Z
   undo_last_point: [Ctrl+Z, Backspace]
   add_point_to_edge: Ctrl+Shift+P
