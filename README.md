@@ -1,6 +1,4 @@
-### Original document: https://github.com/wkentaro/labelme
-
----
+### Original document: https://github.com/locpnh1995/labelme
 
 ## New Features
 
@@ -30,11 +28,13 @@ Remove **.labelmerc** file to apply the new keyboard shortcuts
 
 ## Installation
 
+- Tested on Ubuntu 22.04
+
 1. You need install [Anaconda](https://docs.anaconda.com/anaconda/install/), then run below:
 
 ```bash
 # Setup conda
-conda create --name labelme
+conda create --name labelme python=3.8
 conda activate labelme
 ```
 
@@ -50,3 +50,5 @@ pip install -e .
 ```
 
 4. Type `labelme` on Terminal to open GUI.
+
+5. If counter error `qt.qpa.plugin: Could not load the Qt platform plugin "xcb" in "" even though it was found.` => Reinstall libxcd `sudo apt-get install --reinstall libxcb-xinerama0`
