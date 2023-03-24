@@ -247,3 +247,7 @@ MPLBACKEND='agg' pytest -vsx tests/
 ## Acknowledgement
 
 This repo is the fork of [mpitid/pylabelme](https://github.com/mpitid/pylabelme).
+
+## References
+
+[How to merge two repositories on git?](https://blog.devgenius.io/how-to-merge-two-repositories-on-git-b0ed5e3b4448)
