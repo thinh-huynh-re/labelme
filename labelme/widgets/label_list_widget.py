@@ -62,15 +62,15 @@ class HTMLDelegate(QtWidgets.QStyledItemDelegate):
     def sizeHint(self, option, index):
         thefuckyourshitup_constant = 4
         return QtCore.QSize(
-            self.doc.idealWidth(),
-            self.doc.size().height() - thefuckyourshitup_constant,
+            int(self.doc.idealWidth()),
+            int(self.doc.size().height() - thefuckyourshitup_constant),
         )
 
 
 class LabelListWidgetItem(QtGui.QStandardItem):
     def __init__(self, text=None, shape=None):
         super(LabelListWidgetItem, self).__init__()
-        self.setText(text)
+        self.setText(text or "")
         self.setShape(shape)
 
         self.setCheckable(True)
